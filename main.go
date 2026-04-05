@@ -1,26 +1,24 @@
+// Command ehz is a CLI for exploring and inspecting Strimzi Kafka clusters
+// running on OpenShift.
 package main
 
 import (
 	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
+	"github.com/chay-24/ehz/cmd"
 	"github.com/joewhite86/cli"
 )
 
 func main() {
-	root := &cli.Command{
-		Name:    "ehz",
-		Short:   "Explore and inspect your Kafka cluster.",
-		Long:    "Explore and inspect your Kafka cluster.",
-		Version: "0.1.0",
-	}
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	if err := cli.Run(ctx, root); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+	if err := cli.Run(ctx, cmd.Root()); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 }
