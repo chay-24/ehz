@@ -9,5 +9,5 @@
 ```sh
 git clone https://github.com/chay-24/ehz.git
 cd ehz/
-go build . -o ehz
+go build -o ehz .
 ```
