@@ -84,7 +84,7 @@ func brokerListCmd() cli.Command {
 			for _, cluster := range clusterList.Items {
 				fmt.Printf("\nCluster: %s\n", cluster.Metadata.Name)
 				fmt.Printf("  Kafka version : %s\n", cluster.Status.KafkaVersion)
-				fmt.Printf("  Broker count  : %d\n", cluster.Spec.Kafka.Replicas)
+				fmt.Printf("  Broker count  : %d\n", len(podList.Items))
 				fmt.Printf("  Cluster ready : %s\n", readyStatus(cluster.Status.Conditions))
 
 				if len(cluster.Status.Listeners) > 0 {
