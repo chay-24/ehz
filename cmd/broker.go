@@ -28,7 +28,8 @@ func brokerListCmd() cli.Command {
 	return cli.Command{
 		Name:  "list",
 		Short: "List Kafka clusters and their broker pods in the active namespace.",
-		Run: func(_ context.Context, _ cli.Params) error {
+		Flags: []cli.Flag{outputFlag},
+		Run: func(ctx context.Context, params cli.Params) error {
 			cfg, err := config.Load()
 			if err != nil {
 				return err
@@ -71,6 +72,13 @@ func brokerListCmd() cli.Command {
 			sort.Slice(podList.Items, func(i, j int) bool {
 				return podList.Items[i].Metadata.Name < podList.Items[j].Metadata.Name
 			})
+
+			if outputFormat(params) == "json" {
+				return printJSON(map[string]interface{}{
+					"clusters": clusterList.Items,
+					"pods":     podList.Items,
+				})
+			}
 
 			fmt.Printf("\nBrokers in %s / %s\n", cfg.Current, env.Namespace)
 
