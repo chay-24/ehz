@@ -14,6 +14,7 @@ func Root() *cli.Command {
 			*Config(),
 			*Topic(),
 			*Broker(),
+			*Group(),
 		},
 	}
 }
