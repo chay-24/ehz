@@ -27,9 +27,14 @@ type Config struct {
 
 // Environment holds the OpenShift settings for one named environment.
 type Environment struct {
-	Cluster   string    `yaml:"cluster"`
-	Namespace string    `yaml:"namespace"`
-	CreatedAt time.Time `yaml:"created-at,omitempty"`
+	// Cluster is the OpenShift API server URL, e.g. https://api.cluster.example.com:6443.
+	Cluster string `yaml:"cluster"`
+	// Namespace is the OpenShift project where the Strimzi Kafka cluster lives.
+	Namespace string `yaml:"namespace"`
+	// KafkaCluster is the name of the Strimzi Kafka CR (e.g. "my-cluster").
+	// If empty, ehz auto-detects it from the first Kafka CR in the namespace.
+	KafkaCluster string    `yaml:"kafka-cluster,omitempty"`
+	CreatedAt    time.Time `yaml:"created-at,omitempty"`
 }
 
 // New returns an empty Config with the current API version set.
@@ -53,6 +58,7 @@ func Load() (*Config, error) {
 		if errors.Is(err, os.ErrNotExist) {
 			return New(), nil
 		}
+
 		return nil, fmt.Errorf("reading config: %w", err)
 	}
 
