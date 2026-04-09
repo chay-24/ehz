@@ -1,9 +1,10 @@
-package cmd
+// Package conn provides helpers for establishing a Kafka connection through
+// an oc port-forward tunnel and running admin or consumer operations.
+package conn
 
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/twmb/franz-go/pkg/kadm"
@@ -14,10 +15,10 @@ import (
 	"github.com/chay-24/ehz/openshift"
 )
 
-// withAdmin resolves the Kafka bootstrap service, establishes a port-forward,
+// WithAdmin resolves the Kafka bootstrap service, establishes a port-forward,
 // creates a kadm admin client, and calls fn. The port-forward is torn down
 // when fn returns.
-func withAdmin(ctx context.Context, env *config.Environment, fn func(*kadm.Client) error) error {
+func WithAdmin(ctx context.Context, env *config.Environment, fn func(*kadm.Client) error) error {
 	addr, cancel, err := dial(ctx, env)
 	if err != nil {
 		return err
@@ -33,10 +34,10 @@ func withAdmin(ctx context.Context, env *config.Environment, fn func(*kadm.Clien
 	return fn(admin)
 }
 
-// withConsumer resolves the Kafka bootstrap service, establishes a port-forward,
+// WithConsumer resolves the Kafka bootstrap service, establishes a port-forward,
 // creates a kgo consumer client with the provided options, and calls fn.
 // The port-forward and client are torn down when fn returns.
-func withConsumer(ctx context.Context, env *config.Environment, opts []kgo.Opt, fn func(*kgo.Client) error) error {
+func WithConsumer(ctx context.Context, env *config.Environment, opts []kgo.Opt, fn func(*kgo.Client) error) error {
 	addr, cancel, err := dial(ctx, env)
 	if err != nil {
 		return err
@@ -60,7 +61,6 @@ func dial(ctx context.Context, env *config.Environment) (addr string, cancel fun
 	}
 
 	service := clusterName + "-kafka-bootstrap"
-	fmt.Fprintf(os.Stderr, "Connecting via port-forward to %s...\n", service)
 
 	localPort, cancel, err := openshift.PortForward(ctx, env.Cluster, env.Namespace, service, 9092)
 	if err != nil {

@@ -1,4 +1,4 @@
-package cmd
+package get
 
 import (
 	"context"
@@ -8,27 +8,16 @@ import (
 
 	"github.com/joewhite86/cli"
 
+	"github.com/chay-24/ehz/cmd/shared"
 	"github.com/chay-24/ehz/config"
 	"github.com/chay-24/ehz/openshift"
 )
 
-// Broker returns the 'broker' command for inspecting Strimzi Kafka broker pods.
-func Broker() *cli.Command {
-	return &cli.Command{
-		Name:  "broker",
-		Short: "Inspect Kafka brokers in the active environment.",
-		Long:  "Inspect Kafka brokers in the active environment.",
-		Commands: []cli.Command{
-			brokerListCmd(),
-		},
-	}
-}
-
-func brokerListCmd() cli.Command {
+func brokersCmd() cli.Command {
 	return cli.Command{
-		Name:  "list",
+		Name:  "brokers",
 		Short: "List Kafka clusters and their broker pods in the active namespace.",
-		Flags: []cli.Flag{outputFlag},
+		Flags: []cli.Flag{shared.OutputFlag},
 		Run: func(ctx context.Context, params cli.Params) error {
 			cfg, err := config.Load()
 			if err != nil {
@@ -44,7 +33,6 @@ func brokerListCmd() cli.Command {
 				"get", "kafka",
 				"-o", "json",
 			)
-
 			if err != nil {
 				return err
 			}
@@ -59,7 +47,6 @@ func brokerListCmd() cli.Command {
 				"-l", "strimzi.io/component-type=kafka",
 				"-o", "json",
 			)
-
 			if err != nil {
 				return err
 			}
@@ -73,8 +60,8 @@ func brokerListCmd() cli.Command {
 				return podList.Items[i].Metadata.Name < podList.Items[j].Metadata.Name
 			})
 
-			if outputFormat(params) == "json" {
-				return printJSON(map[string]interface{}{
+			if shared.OutputFormat(params) == "json" {
+				return shared.PrintJSON(map[string]interface{}{
 					"clusters": clusterList.Items,
 					"pods":     podList.Items,
 				})
@@ -85,7 +72,6 @@ func brokerListCmd() cli.Command {
 			if len(clusterList.Items) == 0 {
 				fmt.Printf("\nNo Kafka CR found in namespace %q.\n", env.Namespace)
 				fmt.Println("Check that Strimzi is installed and you are in the correct namespace.")
-
 				return nil
 			}
 
@@ -93,10 +79,10 @@ func brokerListCmd() cli.Command {
 				fmt.Printf("\nCluster: %s\n", cluster.Metadata.Name)
 				fmt.Printf("  Kafka version : %s\n", cluster.Status.KafkaVersion)
 				fmt.Printf("  Broker count  : %d\n", len(podList.Items))
-				fmt.Printf("  Cluster ready : %s\n", readyStatus(cluster.Status.Conditions))
+				fmt.Printf("  Cluster ready : %s\n", shared.ReadyStatus(cluster.Status.Conditions))
 
 				if len(cluster.Status.Listeners) > 0 {
-					fmt.Printf("  Listeners:\n")
+					fmt.Println("  Listeners:")
 					for _, l := range cluster.Status.Listeners {
 						fmt.Printf("    %-15s %s\n", l.Name+":", l.BootstrapServers)
 					}
@@ -105,13 +91,12 @@ func brokerListCmd() cli.Command {
 
 			if len(podList.Items) == 0 {
 				fmt.Printf("\nNo broker pods found (label strimzi.io/component-type=kafka).\n")
-
 				return nil
 			}
 
 			fmt.Printf("\nBroker pods:\n\n")
 			fmt.Printf("  %-45s  %-8s  %s\n", "POD", "READY", "NODE")
-			fmt.Printf("  %-45s  %-8s  %s\n", dashes(45), dashes(8), dashes(30))
+			fmt.Printf("  %-45s  %-8s  %s\n", shared.Dashes(45), shared.Dashes(8), shared.Dashes(30))
 
 			for _, pod := range podList.Items {
 				readyCtr, totalCtr := podReadiness(pod.Status.ContainerStatuses)
@@ -129,6 +114,18 @@ func brokerListCmd() cli.Command {
 	}
 }
 
+// podReadiness returns the count of ready containers and the total container count.
+func podReadiness(statuses []containerStatus) (ready, total int) {
+	total = len(statuses)
+	for _, s := range statuses {
+		if s.Ready {
+			ready++
+		}
+	}
+
+	return
+}
+
 type kafkaClusterList struct {
 	Items []kafkaClusterItem `json:"items"`
 }
@@ -143,9 +140,9 @@ type kafkaClusterItem struct {
 		} `json:"kafka"`
 	} `json:"spec"`
 	Status struct {
-		KafkaVersion string          `json:"kafkaVersion"`
-		Conditions   []k8sCondition  `json:"conditions"`
-		Listeners    []kafkaListener `json:"listeners"`
+		KafkaVersion string                `json:"kafkaVersion"`
+		Conditions   []shared.K8sCondition `json:"conditions"`
+		Listeners    []kafkaListener       `json:"listeners"`
 	} `json:"status"`
 }
 
@@ -172,16 +169,4 @@ type podItem struct {
 
 type containerStatus struct {
 	Ready bool `json:"ready"`
-}
-
-// podReadiness returns the count of ready containers and the total container count.
-func podReadiness(statuses []containerStatus) (ready, total int) {
-	total = len(statuses)
-	for _, s := range statuses {
-		if s.Ready {
-			ready++
-		}
-	}
-
-	return
 }

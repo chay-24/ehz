@@ -1,4 +1,4 @@
-package cmd
+package describe
 
 import (
 	"context"
@@ -8,100 +8,19 @@ import (
 	"github.com/joewhite86/cli"
 	"github.com/twmb/franz-go/pkg/kadm"
 
+	"github.com/chay-24/ehz/cmd/shared"
 	"github.com/chay-24/ehz/config"
+	"github.com/chay-24/ehz/internal/conn"
 )
 
-// Group returns the 'group' command for inspecting Kafka consumer groups.
-func Group() *cli.Command {
-	return &cli.Command{
+func groupCmd() cli.Command {
+	return cli.Command{
 		Name:  "group",
-		Short: "List and describe Kafka consumer groups.",
-		Long:  "Reads consumer group metadata and per-partition lag from the Kafka cluster.",
-		Commands: []cli.Command{
-			groupListCmd(),
-			groupDescribeCmd(),
-		},
-		Run: func(_ context.Context, _ cli.Params) error {
-			fmt.Println("  ehz group list              — list all consumer groups")
-			fmt.Println("  ehz group describe <group>  — show per-partition lag")
-			return nil
-		},
-	}
-}
-
-func groupListCmd() cli.Command {
-	return cli.Command{
-		Name:  "list",
-		Short: "List all consumer groups and their state.",
-		Flags: []cli.Flag{outputFlag},
-		Run: func(ctx context.Context, params cli.Params) error {
-			cfg, err := config.Load()
-			if err != nil {
-				return err
-			}
-
-			env, err := cfg.Active()
-			if err != nil {
-				return err
-			}
-
-			type row struct {
-				Group   string `json:"group"`
-				State   string `json:"state"`
-				Members int    `json:"members"`
-			}
-
-			var rows []row
-
-			err = withAdmin(ctx, env, func(admin *kadm.Client) error {
-				groups, err := admin.DescribeGroups(ctx)
-				if err != nil {
-					return fmt.Errorf("listing consumer groups: %w", err)
-				}
-
-				for _, g := range groups.Sorted() {
-					rows = append(rows, row{
-						Group:   g.Group,
-						State:   g.State,
-						Members: len(g.Members),
-					})
-				}
-
-				return nil
-			})
-
-			if err != nil {
-				return err
-			}
-
-			sort.Slice(rows, func(i, j int) bool { return rows[i].Group < rows[j].Group })
-
-			if outputFormat(params) == "json" {
-				return printJSON(rows)
-			}
-
-			fmt.Printf("\nConsumer groups in %s / %s\n\n", cfg.Current, env.Namespace)
-			fmt.Printf("  %-50s  %-12s  %7s\n", "GROUP", "STATE", "MEMBERS")
-			fmt.Printf("  %-50s  %-12s  %7s\n", dashes(50), dashes(12), dashes(7))
-			for _, r := range rows {
-				fmt.Printf("  %-50s  %-12s  %7d\n", r.Group, r.State, r.Members)
-			}
-
-			fmt.Printf("\n%d group(s)\n", len(rows))
-
-			return nil
-		},
-	}
-}
-
-func groupDescribeCmd() cli.Command {
-	return cli.Command{
-		Name:  "describe",
 		Short: "Show per-partition committed offsets and lag for a consumer group.",
 		Args: []cli.Arg{
 			{Name: "group", Description: "Consumer group name", Required: true},
 		},
-		Flags: []cli.Flag{outputFlag},
+		Flags: []cli.Flag{shared.OutputFlag},
 		Run: func(ctx context.Context, params cli.Params) error {
 			groupName, _ := params["group"].(string)
 
@@ -133,7 +52,7 @@ func groupDescribeCmd() cli.Command {
 
 			var detail groupDetail
 
-			err = withAdmin(ctx, env, func(admin *kadm.Client) error {
+			err = conn.WithAdmin(ctx, env, func(admin *kadm.Client) error {
 				groups, err := admin.DescribeGroups(ctx, groupName)
 				if err != nil {
 					return fmt.Errorf("describing group: %w", err)
@@ -196,12 +115,13 @@ func groupDescribeCmd() cli.Command {
 
 				return nil
 			})
+
 			if err != nil {
 				return err
 			}
 
-			if outputFormat(params) == "json" {
-				return printJSON(detail)
+			if shared.OutputFormat(params) == "json" {
+				return shared.PrintJSON(detail)
 			}
 
 			fmt.Printf("\nGroup:      %s\n", detail.Group)
@@ -212,7 +132,7 @@ func groupDescribeCmd() cli.Command {
 			fmt.Printf("  %-40s  %9s  %17s  %10s  %6s\n",
 				"TOPIC", "PARTITION", "COMMITTED-OFFSET", "END-OFFSET", "LAG")
 			fmt.Printf("  %-40s  %9s  %17s  %10s  %6s\n",
-				dashes(40), dashes(9), dashes(17), dashes(10), dashes(6))
+				shared.Dashes(40), shared.Dashes(9), shared.Dashes(17), shared.Dashes(10), shared.Dashes(6))
 
 			for _, p := range detail.Partitions {
 				fmt.Printf("  %-40s  %9d  %17d  %10d  %6d\n",

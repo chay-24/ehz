@@ -1,9 +1,17 @@
-// Package cmd defines the top-level CLI commands for ehz.
+// Package cmd wires all ehz verb commands into the root command.
 package cmd
 
-import "github.com/joewhite86/cli"
+import (
+	"github.com/joewhite86/cli"
 
-// Root returns the root ehz command with all sub-commands registered.
+	"github.com/chay-24/ehz/cmd/consume"
+	"github.com/chay-24/ehz/cmd/describe"
+	"github.com/chay-24/ehz/cmd/find"
+	"github.com/chay-24/ehz/cmd/get"
+	"github.com/chay-24/ehz/cmd/use"
+)
+
+// Root returns the root ehz command with all verb commands registered.
 func Root() *cli.Command {
 	return &cli.Command{
 		Name:    "ehz",
@@ -11,10 +19,11 @@ func Root() *cli.Command {
 		Long:    "Explore and inspect your Kafka cluster.",
 		Version: "0.1.0",
 		Commands: []cli.Command{
-			*Config(),
-			*Topic(),
-			*Broker(),
-			*Group(),
+			*get.Get(),
+			*describe.Describe(),
+			*consume.Consume(),
+			*find.Find(),
+			*use.Use(),
 		},
 	}
 }
