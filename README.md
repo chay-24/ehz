@@ -2,7 +2,7 @@
 
 > *Where events become observable!*
 
-`ehz` is the CLI for inspecting Kafka messages. Tail topics, search for a specific message, and list topics.
+`ehz` is the CLI for inspecting Strimzi Kafka messages. Tail topics, search for a specific message, and list topics.
 
 ## Install
 
