@@ -10,8 +10,6 @@ import (
 
 	"github.com/joewhite86/cli"
 	"github.com/twmb/franz-go/pkg/kgo"
-
-	"github.com/chay-24/ehz/config"
 )
 
 // OutputFlag is the standard -o / --output flag shared by all list and describe
@@ -22,21 +20,6 @@ var OutputFlag = cli.Flag{
 	HasValue:    true,
 	Description: `Output format: "table" (default) or "json".`,
 	Default:     "table",
-}
-
-// LoadEnv loads the config and resolves the active environment.
-func LoadEnv() (*config.Config, *config.Environment, error) {
-	cfg, err := config.Load()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	env, err := cfg.Active()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return cfg, env, nil
 }
 
 // OutputFormat extracts the --output flag value from params, falling back to

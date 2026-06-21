@@ -9,6 +9,7 @@ import (
 	"github.com/joewhite86/cli"
 
 	"github.com/chay-24/ehz/cmd/shared"
+	"github.com/chay-24/ehz/config"
 	"github.com/chay-24/ehz/openshift"
 )
 
@@ -18,7 +19,12 @@ func brokersCmd() cli.Command {
 		Short: "List Kafka clusters and their broker pods in the active namespace.",
 		Flags: []cli.Flag{shared.OutputFlag},
 		Run: func(ctx context.Context, params cli.Params) error {
-			cfg, env, err := shared.LoadEnv()
+			cfg, err := config.Load()
+			if err != nil {
+				return err
+			}
+
+			env, err := cfg.Active()
 			if err != nil {
 				return err
 			}

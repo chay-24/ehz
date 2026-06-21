@@ -9,6 +9,7 @@ import (
 	"github.com/twmb/franz-go/pkg/kadm"
 
 	"github.com/chay-24/ehz/cmd/shared"
+	"github.com/chay-24/ehz/config"
 	"github.com/chay-24/ehz/internal/conn"
 )
 
@@ -18,7 +19,12 @@ func topicsCmd() cli.Command {
 		Short: "List all topics with partition and replication counts.",
 		Flags: []cli.Flag{shared.OutputFlag},
 		Run: func(ctx context.Context, params cli.Params) error {
-			cfg, env, err := shared.LoadEnv()
+			cfg, err := config.Load()
+			if err != nil {
+				return err
+			}
+
+			env, err := cfg.Active()
 			if err != nil {
 				return err
 			}

@@ -1,7 +1,12 @@
 // Package consume implements the 'ehz consume' verb command.
 package consume
 
-import "github.com/joewhite86/cli"
+import (
+	"context"
+	"fmt"
+
+	"github.com/joewhite86/cli"
+)
 
 // Consume returns the 'consume' verb command with all consumable resources registered.
 func Consume() *cli.Command {
@@ -10,6 +15,11 @@ func Consume() *cli.Command {
 		Short: "Stream messages from a Kafka resource.",
 		Commands: []cli.Command{
 			topicCmd(),
+		},
+		Run: func(_ context.Context, _ cli.Params) error {
+			fmt.Println("  ehz consume topic <name>  — stream messages from a topic")
+
+			return nil
 		},
 	}
 }
