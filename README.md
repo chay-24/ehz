@@ -1,5 +1,12 @@
 # event-horizon
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/chay-24/ehz.svg)](https://pkg.go.dev/github.com/chay-24/ehz)
+[![Go Report Card](https://goreportcard.com/badge/github.com/chay-24/ehz)](https://goreportcard.com/report/github.com/chay-24/ehz)
+[![Release](https://img.shields.io/github/v/release/chay-24/ehz)](https://github.com/chay-24/ehz/releases/latest)
+[![License](https://img.shields.io/github/license/chay-24/ehz)](LICENSE.md)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/chay-24/ehz)](go.mod)
+[![GitHub stars](https://img.shields.io/github/stars/chay-24/ehz?style=social)](https://github.com/chay-24/ehz/stargazers)
+
 > *Where events become observable!*
 
 `ehz` is the CLI for inspecting Strimzi Kafka messages. Tail topics, search for a specific message, and list topics.
