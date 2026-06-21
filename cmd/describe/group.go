@@ -9,7 +9,6 @@ import (
 	"github.com/twmb/franz-go/pkg/kadm"
 
 	"github.com/chay-24/ehz/cmd/shared"
-	"github.com/chay-24/ehz/config"
 	"github.com/chay-24/ehz/internal/conn"
 )
 
@@ -24,12 +23,7 @@ func groupCmd() cli.Command {
 		Run: func(ctx context.Context, params cli.Params) error {
 			groupName, _ := params["group"].(string)
 
-			cfg, err := config.Load()
-			if err != nil {
-				return err
-			}
-
-			env, err := cfg.Active()
+			_, env, err := shared.LoadEnv()
 			if err != nil {
 				return err
 			}

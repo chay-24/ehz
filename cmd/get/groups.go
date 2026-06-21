@@ -9,7 +9,6 @@ import (
 	"github.com/twmb/franz-go/pkg/kadm"
 
 	"github.com/chay-24/ehz/cmd/shared"
-	"github.com/chay-24/ehz/config"
 	"github.com/chay-24/ehz/internal/conn"
 )
 
@@ -19,12 +18,7 @@ func groupsCmd() cli.Command {
 		Short: "List all consumer groups and their state.",
 		Flags: []cli.Flag{shared.OutputFlag},
 		Run: func(ctx context.Context, params cli.Params) error {
-			cfg, err := config.Load()
-			if err != nil {
-				return err
-			}
-
-			env, err := cfg.Active()
+			cfg, env, err := shared.LoadEnv()
 			if err != nil {
 				return err
 			}
