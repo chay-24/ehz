@@ -41,13 +41,13 @@ You must already be logged in via `oc login` to each cluster URL.
 | `ehz tree [cluster]` | Strimzi resource dependency tree
 | `ehz consume topic <name>` | Stream messages from a topic |
 | `ehz find topic <name> -w <expr>` | Scan from beginning for the first matching message |
-| `ehz use env <name>` | switch the active environment |
+| `ehz use env <name>` | Switch the active environment |
 
 All listing/describing commands accept `-o json` for machine output.
 
 ## Filtering message (`-w` / `--where`)
 
-`consume` and `fidn` accept a comma-separated filter expression that runs against JSON message bodies.
+`consume` and `find` accept a comma-separated filter expression that runs against JSON message bodies.
 Dot notation traverses nested fields.
 
 ```sh
