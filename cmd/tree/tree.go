@@ -336,7 +336,7 @@ func podLabel(p item) string {
 		phase = "Unknown"
 	}
 
-	label := fmt.Sprintf("Pod/%s %d%d %s", p.Metadata.Name, ready, total, phase)
+	label := fmt.Sprintf("Pod/%s %d/%d %s", p.Metadata.Name, ready, total, phase)
 	if len(reasons) > 0 {
 		label += "  (" + strings.Join(reasons, ", ") + ")"
 	}
