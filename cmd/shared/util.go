@@ -160,6 +160,8 @@ type K8sCondition struct {
 }
 
 // ReadyStatus scans a condition slice and returns "Ready", "NotReady", or "Unknown".
+// It checks for an explicit "Ready" condition; then falls back to detecting
+// a "NotReady" condition.
 func ReadyStatus(conditions []K8sCondition) string {
 	for _, c := range conditions {
 		if c.Type == "Ready" {
@@ -167,6 +169,12 @@ func ReadyStatus(conditions []K8sCondition) string {
 				return "Ready"
 			}
 
+			return "NotReady"
+		}
+	}
+
+	for _, c := range conditions {
+		if c.Type == "NotReady" && c.Status == "True" {
 			return "NotReady"
 		}
 	}
