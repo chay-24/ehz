@@ -1,6 +1,6 @@
 module github.com/chay-24/ehz
 
-go 1.26.4
+go 1.26.5
 
 require (
 	github.com/joewhite86/cli v1.0.0
