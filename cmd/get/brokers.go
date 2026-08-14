@@ -17,7 +17,7 @@ func brokersCmd() cli.Command {
 		Name:  "brokers",
 		Short: "List Kafka clusters and their broker pods in the active namespace.",
 		Flags: []cli.Flag{shared.OutputFlag},
-		Run: func(ctx context.Context, params cli.Params) error {
+		Run: func(_ context.Context, params cli.Params) error {
 			cfg, env, err := shared.LoadEnv()
 			if err != nil {
 				return err

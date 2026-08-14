@@ -73,7 +73,7 @@ func dial(ctx context.Context, env *config.Environment) (addr string, cancel fun
 // resolveKafkaCluster returns the Strimzi Kafka CR name for the environment.
 // If KafkaCluster is set in the config it is used directly; otherwise the
 // first Kafka CR in the namespace is discovered via 'oc'.
-func resolveKafkaCluster(ctx context.Context, env *config.Environment) (string, error) {
+func resolveKafkaCluster(_ context.Context, env *config.Environment) (string, error) {
 	if env.KafkaCluster != "" {
 		return env.KafkaCluster, nil
 	}

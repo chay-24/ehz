@@ -48,7 +48,7 @@ func freePort() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer l.Close()
+	defer func() { _ = l.Close() }()
 
 	return l.Addr().(*net.TCPAddr).Port, nil
 }
@@ -61,7 +61,7 @@ func waitForPort(port int, timeout time.Duration) error {
 	for time.Now().Before(deadline) {
 		conn, err := net.DialTimeout("tcp", addr, 200*time.Millisecond)
 		if err == nil {
-			conn.Close()
+			_ = conn.Close()
 
 			return nil
 		}

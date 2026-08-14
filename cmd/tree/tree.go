@@ -1,3 +1,4 @@
+// Package tree implements the 'ehz tree' verb command.
 package tree
 
 import (
