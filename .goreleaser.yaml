@@ -1,0 +1,23 @@
+version: 2
+
+builds:
+  - env: [CGO_ENABLED=0]
+    goos: [linux, darwin]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w -X github.com/chay-24/ehz/cmd.version={{.Version}}
+
+homebrew_casks:
+  - repository:
+      owner: chay-24
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: https://github.com/chay-24/ehz
+    description: CLI for inspecting Strimzi Kafka messages on OpenShift.
+    hooks:
+      post:
+        # Binaries are unsigned; without this macOS Gatekeeper blocks them.
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/ehz"]
+          end
