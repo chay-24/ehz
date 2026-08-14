@@ -12,13 +12,16 @@ import (
 	"github.com/chay-24/ehz/cmd/use"
 )
 
+// version is set at build time by goreleaser via -ldflags.
+var version = "dev"
+
 // Root returns the root ehz command with all verb commands registered.
 func Root() *cli.Command {
 	return &cli.Command{
 		Name:    "ehz",
 		Short:   "Explore and inspect your Strimzi Kafka cluster on OpenShift.",
 		Long:    "Explore and inspect your StrimziKafka cluster on OpenShift.",
-		Version: "0.1.0",
+		Version: version,
 		Commands: []cli.Command{
 			*get.Get(),
 			*describe.Describe(),
