@@ -2,6 +2,7 @@ package consume
 
 import (
 	"context"
+	"errors"
 
 	"github.com/joewhite86/cli"
 	"github.com/twmb/franz-go/pkg/kgo"
@@ -112,7 +113,7 @@ func topicCmd() cli.Command {
 						}
 					})
 
-					if ferr == shared.ErrDone {
+					if errors.Is(ferr, shared.ErrDone) {
 						return nil
 					}
 

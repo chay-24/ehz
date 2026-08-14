@@ -1,0 +1,21 @@
+version: "2"
+
+linters:
+  enable:
+    - errorlint
+    - gocritic
+    - gosec
+    - misspell
+    - revive
+    - unconvert
+
+  settings:
+    gosec:
+      excludes:
+        - G204
+        - G304
+
+formatters:
+  enable:
+    - gofmt
+    - goimports

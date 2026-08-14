@@ -94,7 +94,7 @@ func (c *Config) Save() error {
 	if err := os.WriteFile(tmp, data, 0o600); err != nil {
 		return fmt.Errorf("writing config: %w", err)
 	}
-	defer os.Remove(tmp)
+	defer func() { _ = os.Remove(tmp) }()
 
 	if err := os.Rename(tmp, p); err != nil {
 		return fmt.Errorf("finalising config: %w", err)

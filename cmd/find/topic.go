@@ -2,6 +2,7 @@ package find
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -84,7 +85,7 @@ func topicCmd() cli.Command {
 						ferr = shared.ErrDone
 					})
 
-					if ferr == shared.ErrDone {
+					if errors.Is(ferr, shared.ErrDone) {
 						return nil
 					}
 
