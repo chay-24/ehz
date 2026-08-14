@@ -17,7 +17,9 @@ homebrew_casks:
     hooks:
       post:
         # Binaries are unsigned; without this macOS Gatekeeper blocks them.
+        # Guard on OS.mac? — /usr/bin/xattr does not exist on Linux and
+        # system_command raises (not just non-zero) when it is missing.
         install: |
-          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+          if OS.mac?
             system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/ehz"]
           end

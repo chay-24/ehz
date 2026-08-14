@@ -1,5 +1,6 @@
 # event-horizon
 
+[![CI](https://github.com/chay-24/ehz/actions/workflows/ci.yml/badge.svg)](https://github.com/chay-24/ehz/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/chay-24/ehz.svg)](https://pkg.go.dev/github.com/chay-24/ehz)
 [![Release](https://img.shields.io/github/v/release/chay-24/ehz)](https://github.com/chay-24/ehz/releases/latest)
 [![License](https://img.shields.io/github/license/chay-24/ehz)](LICENSE.md)
@@ -11,6 +12,31 @@
 `ehz` is the CLI for inspecting Strimzi Kafka messages. Tail topics, search for a specific message, and list topics.
 
 ## Install
+
+### Homebrew
+
+```sh
+brew tap chay-24/tap
+brew trust --cask chay-24/tap/ehz
+brew install ehz
+```
+
+Upgrade later with `brew upgrade ehz`.
+
+### Download
+
+Download the binary for your platform ([all releases](https://github.com/chay-24/ehz/releases/latest)):
+
+```sh
+curl -sL https://github.com/chay-24/ehz/releases/download/v1.2.0/ehz_1.2.0_linux_amd64.tar.gz | tar xz
+sudo mv ehz /usr/local/bin/
+```
+
+Swap `linux_amd64` for `linux_arm64`, `darwin_amd64`, or `darwin_arm64` as needed.
+
+### From source
+
+Requires Go (see [go.mod](go.mod) for the version):
 
 ```sh
 git clone https://github.com/chay-24/ehz.git
