@@ -1,4 +1,4 @@
-# event-horizon
+# event-horizon - Strimzi Kafka CLI for OpenShift
 
 [![CI](https://github.com/chay-24/ehz/actions/workflows/ci.yml/badge.svg)](https://github.com/chay-24/ehz/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/chay-24/ehz.svg)](https://pkg.go.dev/github.com/chay-24/ehz)
