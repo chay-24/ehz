@@ -17,9 +17,11 @@
 
 ```sh
 brew tap chay-24/tap
-brew trust --cask chay-24/tap/ehz
-brew install ehz
+brew install chay-24/tap/ehz
 ```
+
+Homebrew 6.0+ asks you to trust the tap the first time.
+run `brew trust --tap chay-24/tap` beforehand.
 
 Upgrade later with `brew upgrade ehz`.
 

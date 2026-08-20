@@ -7,19 +7,16 @@ builds:
     ldflags:
       - -s -w -X github.com/chay-24/ehz/cmd.version={{.Version}}
 
-homebrew_casks:
+brews:
   - repository:
       owner: chay-24
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Formula
     homepage: https://github.com/chay-24/ehz
-    description: CLI for inspecting Strimzi Kafka messages on OpenShift.
-    hooks:
-      post:
-        # Binaries are unsigned; without this macOS Gatekeeper blocks them.
-        # Guard on OS.mac? — /usr/bin/xattr does not exist on Linux and
-        # system_command raises (not just non-zero) when it is missing.
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/ehz"]
-          end
+    description: CLI for inspecting Strimzi Kafka messages on OpenShift
+    license: MIT
+    install: |
+      bin.install "ehz"
+    test: |
+      system "#{bin}/ehz", "--version"
