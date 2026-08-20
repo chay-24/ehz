@@ -8,6 +8,15 @@ import (
 	"os/exec"
 )
 
+// Strimzi resource types for use with 'oc' commands.
+const (
+	ResourceKafka         = "kafka.kafka.strimzi.io"
+	ResourceKafkaNodePool = "kafkanodepool.kafka.strimzi.io"
+	ResourceKafkaTopic    = "kafkatopic.kafka.strimzi.io"
+	ResourceKafkaUser     = "kafkauser.kafka.strimzi.io"
+	ResourceStrimziPodSet = "strimzipodset.core.strimzi.io"
+)
+
 // Run executes an 'oc' command against the given cluster and namespace,
 // returning the combined stdout output. Stderr is captured and returned
 // as part of the error if the command fails.
