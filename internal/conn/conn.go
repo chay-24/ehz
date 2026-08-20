@@ -79,7 +79,7 @@ func resolveKafkaCluster(_ context.Context, env *config.Environment) (string, er
 	}
 
 	out, err := openshift.Run(env.Cluster, env.Namespace,
-		"get", "kafka",
+		"get", openshift.ResourceKafka,
 		"-o", "jsonpath={.items[0].metadata.name}",
 	)
 	if err != nil {

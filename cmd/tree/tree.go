@@ -83,12 +83,12 @@ func run(_ context.Context, params cli.Params) error {
 func build(env *config.Environment, k kafkaCR) (*node, error) {
 	sel := labelCluster + "=" + k.Metadata.Name
 
-	pools, err := list(env, "kafkanodepool", sel)
+	pools, err := list(env, openshift.ResourceKafkaNodePool, sel)
 	if err != nil {
 		return nil, err
 	}
 
-	podsets, err := list(env, "strimzipodset", sel)
+	podsets, err := list(env, openshift.ResourceStrimziPodSet, sel)
 	if err != nil {
 		return nil, err
 	}
@@ -103,12 +103,12 @@ func build(env *config.Environment, k kafkaCR) (*node, error) {
 		return nil, err
 	}
 
-	topics, err := list(env, "kafkatopic", sel)
+	topics, err := list(env, openshift.ResourceKafkaTopic, sel)
 	if err != nil {
 		return nil, err
 	}
 
-	users, err := list(env, "kafkauser", sel)
+	users, err := list(env, openshift.ResourceKafkaUser, sel)
 	if err != nil {
 		return nil, err
 	}
@@ -351,9 +351,9 @@ func podLabel(p item) string {
 
 // fetchKafkas returns all Kafka CRs in the namespace, optionally filtered to one.
 func fetchKafkas(env *config.Environment, name string) ([]kafkaCR, error) {
-	args := []string{"get", "kafka", "-o", "json"}
+	args := []string{"get", openshift.ResourceKafka, "-o", "json"}
 	if name != "" {
-		args = []string{"get", "kafka", name, "-o", "json"}
+		args = []string{"get", openshift.ResourceKafka, name, "-o", "json"}
 	}
 
 	out, err := openshift.Run(env.Cluster, env.Namespace, args...)

@@ -24,7 +24,7 @@ func brokersCmd() cli.Command {
 			}
 
 			clusterOut, err := openshift.Run(env.Cluster, env.Namespace,
-				"get", "kafka",
+				"get", openshift.ResourceKafka,
 				"-o", "json",
 			)
 			if err != nil {
