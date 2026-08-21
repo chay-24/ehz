@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -13,8 +14,14 @@ import (
 	"github.com/joewhite86/cli"
 )
 
+const exitInterrupted = 130
+
 func main() {
 	if err := run(); err != nil {
+		if errors.Is(err, context.Canceled) {
+			os.Exit(exitInterrupted)
+		}
+
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}

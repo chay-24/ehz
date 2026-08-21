@@ -17,13 +17,13 @@ func brokersCmd() cli.Command {
 		Name:  "brokers",
 		Short: "List Kafka clusters and their broker pods in the active namespace.",
 		Flags: []cli.Flag{shared.OutputFlag},
-		Run: func(_ context.Context, params cli.Params) error {
+		Run: func(ctx context.Context, params cli.Params) error {
 			cfg, env, err := shared.LoadEnv()
 			if err != nil {
 				return err
 			}
 
-			clusterOut, err := openshift.Run(env.Cluster, env.Namespace,
+			clusterOut, err := openshift.Run(ctx, env.Cluster, env.Namespace,
 				"get", openshift.ResourceKafka,
 				"-o", "json",
 			)
@@ -36,7 +36,7 @@ func brokersCmd() cli.Command {
 				return fmt.Errorf("parsing Kafka list: %w", err)
 			}
 
-			podOut, err := openshift.Run(env.Cluster, env.Namespace,
+			podOut, err := openshift.Run(ctx, env.Cluster, env.Namespace,
 				"get", "pods",
 				"-l", "strimzi.io/component-type=kafka",
 				"-o", "json",
