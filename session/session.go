@@ -1,6 +1,7 @@
-// Package conn provides helpers for establishing a Kafka connection through
-// an oc port-forward tunnel and running admin or consumer operations.
-package conn
+// Package session opens a scoped Kafka session for an environment: it resolves
+// the Strimzi cluster, establishes an oc port-forward tunnel, runs admin or
+// consumer operations through it, and tears everything down afterwards.
+package session
 
 import (
 	"context"

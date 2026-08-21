@@ -8,8 +8,8 @@ import (
 	"github.com/twmb/franz-go/pkg/kgo"
 
 	"github.com/chay-24/ehz/cmd/shared"
-	"github.com/chay-24/ehz/internal/conn"
 	"github.com/chay-24/ehz/kafka"
+	"github.com/chay-24/ehz/session"
 )
 
 func topicCmd() cli.Command {
@@ -83,7 +83,7 @@ func topicCmd() cli.Command {
 
 			opts := shared.BuildConsumeOpts(topicName, fromBeginning, partition, offset)
 
-			return conn.WithConsumer(ctx, env, opts, func(cl *kgo.Client) error {
+			return session.WithConsumer(ctx, env, opts, func(cl *kgo.Client) error {
 				count := int32(0)
 				for {
 					fetches := cl.PollFetches(ctx)

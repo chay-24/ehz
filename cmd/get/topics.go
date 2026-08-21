@@ -9,7 +9,7 @@ import (
 	"github.com/twmb/franz-go/pkg/kadm"
 
 	"github.com/chay-24/ehz/cmd/shared"
-	"github.com/chay-24/ehz/internal/conn"
+	"github.com/chay-24/ehz/session"
 )
 
 func topicsCmd() cli.Command {
@@ -31,7 +31,7 @@ func topicsCmd() cli.Command {
 
 			var rows []row
 
-			err = conn.WithAdmin(ctx, env, func(admin *kadm.Client) error {
+			err = session.WithAdmin(ctx, env, func(admin *kadm.Client) error {
 				topics, err := admin.ListTopics(ctx)
 				if err != nil {
 					return fmt.Errorf("listing topics: %w", err)
