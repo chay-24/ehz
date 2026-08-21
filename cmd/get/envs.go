@@ -51,12 +51,7 @@ func envsCmd() cli.Command {
 			}
 
 			if len(cfgData.Environments) == 0 {
-				p, err := config.DefaultPath()
-				if err != nil {
-					return err
-				}
-
-				fmt.Printf("No environments configured. Edit %s to get started.\n", p)
+				fmt.Println("No environments configured. Run `ehz use env <name> --cluster <url> --namespace <ns>` to add one.")
 
 				return nil
 			}

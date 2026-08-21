@@ -1,6 +1,7 @@
-// Package conn provides helpers for establishing a Kafka connection through
-// an oc port-forward tunnel and running admin or consumer operations.
-package conn
+// Package session opens a scoped Kafka session for an environment: it resolves
+// the Strimzi cluster, establishes an oc port-forward tunnel, runs admin or
+// consumer operations through it, and tears everything down afterwards.
+package session
 
 import (
 	"context"
@@ -73,12 +74,12 @@ func dial(ctx context.Context, env *config.Environment) (addr string, cancel fun
 // resolveKafkaCluster returns the Strimzi Kafka CR name for the environment.
 // If KafkaCluster is set in the config it is used directly; otherwise the
 // first Kafka CR in the namespace is discovered via 'oc'.
-func resolveKafkaCluster(_ context.Context, env *config.Environment) (string, error) {
+func resolveKafkaCluster(ctx context.Context, env *config.Environment) (string, error) {
 	if env.KafkaCluster != "" {
 		return env.KafkaCluster, nil
 	}
 
-	out, err := openshift.Run(env.Cluster, env.Namespace,
+	out, err := openshift.Run(ctx, env.Cluster, env.Namespace,
 		"get", openshift.ResourceKafka,
 		"-o", "jsonpath={.items[0].metadata.name}",
 	)

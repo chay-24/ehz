@@ -9,7 +9,7 @@ import (
 	"github.com/twmb/franz-go/pkg/kadm"
 
 	"github.com/chay-24/ehz/cmd/shared"
-	"github.com/chay-24/ehz/internal/conn"
+	"github.com/chay-24/ehz/session"
 )
 
 func groupCmd() cli.Command {
@@ -46,7 +46,7 @@ func groupCmd() cli.Command {
 
 			var detail groupDetail
 
-			err = conn.WithAdmin(ctx, env, func(admin *kadm.Client) error {
+			err = session.WithAdmin(ctx, env, func(admin *kadm.Client) error {
 				groups, err := admin.DescribeGroups(ctx, groupName)
 				if err != nil {
 					return fmt.Errorf("describing group: %w", err)

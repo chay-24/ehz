@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/chay-24/ehz/cmd/shared"
 	"github.com/chay-24/ehz/config"
@@ -31,7 +32,7 @@ func Tree() *cli.Command {
 	}
 }
 
-func run(_ context.Context, params cli.Params) error {
+func run(ctx context.Context, params cli.Params) error {
 	cfg, env, err := shared.LoadEnv()
 	if err != nil {
 		return err
@@ -39,7 +40,7 @@ func run(_ context.Context, params cli.Params) error {
 
 	name, _ := params["cluster"].(string)
 
-	clusters, err := fetchKafkas(env, name)
+	clusters, err := fetchKafkas(ctx, env, name)
 	if err != nil {
 		return err
 	}
@@ -51,7 +52,7 @@ func run(_ context.Context, params cli.Params) error {
 	if shared.OutputFormat(params) == "json" {
 		out := make([]map[string]any, 0, len(clusters))
 		for _, k := range clusters {
-			t, err := build(env, k)
+			t, err := build(ctx, env, k)
 			if err != nil {
 				return err
 			}
@@ -64,7 +65,7 @@ func run(_ context.Context, params cli.Params) error {
 	fmt.Printf("\nResource tree for %s / %s\n\n", cfg.Current, env.Namespace)
 
 	for i, k := range clusters {
-		t, err := build(env, k)
+		t, err := build(ctx, env, k)
 		if err != nil {
 			return err
 		}
@@ -80,37 +81,43 @@ func run(_ context.Context, params cli.Params) error {
 }
 
 // build assembles the dependency tree rooted at the given Kafka CR.
-func build(env *config.Environment, k kafkaCR) (*node, error) {
+func build(ctx context.Context, env *config.Environment, k kafkaCR) (*node, error) {
 	sel := labelCluster + "=" + k.Metadata.Name
 
-	pools, err := list(env, openshift.ResourceKafkaNodePool, sel)
-	if err != nil {
-		return nil, err
+	var pools, podsets, pods, services, topics, users itemList
+
+	targets := []struct {
+		dst  *itemList
+		kind string
+	}{
+		{&pools, openshift.ResourceKafkaNodePool},
+		{&podsets, openshift.ResourceStrimziPodSet},
+		{&pods, "pod"},
+		{&services, "service"},
+		{&topics, openshift.ResourceKafkaTopic},
+		{&users, openshift.ResourceKafkaUser},
 	}
 
-	podsets, err := list(env, openshift.ResourceStrimziPodSet, sel)
-	if err != nil {
-		return nil, err
+	var wg sync.WaitGroup
+
+	errs := make([]error, len(targets))
+
+	wg.Add(len(targets))
+
+	for i, t := range targets {
+		go func() {
+			defer wg.Done()
+
+			*t.dst, errs[i] = list(ctx, env, t.kind, sel)
+		}()
 	}
 
-	pods, err := list(env, "pod", sel)
-	if err != nil {
-		return nil, err
-	}
+	wg.Wait()
 
-	services, err := list(env, "service", sel)
-	if err != nil {
-		return nil, err
-	}
-
-	topics, err := list(env, openshift.ResourceKafkaTopic, sel)
-	if err != nil {
-		return nil, err
-	}
-
-	users, err := list(env, openshift.ResourceKafkaUser, sel)
-	if err != nil {
-		return nil, err
+	for _, err := range errs {
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Pods grouped by owning StrimziPodSet.
@@ -136,7 +143,6 @@ func build(env *config.Environment, k kafkaCR) (*node, error) {
 		}
 
 		if owner == "" {
-			// Naming convention fallback: <cluster>-<pool>
 			owner = strings.TrimPrefix(ps.Metadata.Name, k.Metadata.Name+"-")
 		}
 
@@ -308,7 +314,7 @@ func podLabel(p item) string {
 	ready, total := 0, len(p.Status.ContainerStatuses)
 	restarts := 0
 	var reasons []string
-	seem := map[string]bool{}
+	seen := map[string]bool{}
 
 	for _, c := range p.Status.ContainerStatuses {
 		if c.Ready {
@@ -326,9 +332,9 @@ func podLabel(p item) string {
 			reason = c.State.Terminated.Reason
 		}
 
-		if reason != "" && reason != "Completed" && !seem[reason] {
+		if reason != "" && reason != "Completed" && !seen[reason] {
 			reasons = append(reasons, reason)
-			seem[reason] = true
+			seen[reason] = true
 		}
 	}
 
@@ -350,13 +356,13 @@ func podLabel(p item) string {
 }
 
 // fetchKafkas returns all Kafka CRs in the namespace, optionally filtered to one.
-func fetchKafkas(env *config.Environment, name string) ([]kafkaCR, error) {
+func fetchKafkas(ctx context.Context, env *config.Environment, name string) ([]kafkaCR, error) {
 	args := []string{"get", openshift.ResourceKafka, "-o", "json"}
 	if name != "" {
 		args = []string{"get", openshift.ResourceKafka, name, "-o", "json"}
 	}
 
-	out, err := openshift.Run(env.Cluster, env.Namespace, args...)
+	out, err := openshift.Run(ctx, env.Cluster, env.Namespace, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -383,10 +389,10 @@ func fetchKafkas(env *config.Environment, name string) ([]kafkaCR, error) {
 
 // list runs 'oc get <kind> -l <selector> -o json'. Returns an empty list when
 // the CRD is not installed on the cluster.
-func list(env *config.Environment, kind, selector string) (itemList, error) {
+func list(ctx context.Context, env *config.Environment, kind, selector string) (itemList, error) {
 	var l itemList
 
-	out, err := openshift.Run(env.Cluster, env.Namespace,
+	out, err := openshift.Run(ctx, env.Cluster, env.Namespace,
 		"get", kind,
 		"-l", selector,
 		"-o", "json",

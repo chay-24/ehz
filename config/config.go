@@ -108,20 +108,20 @@ func (c *Config) Save() error {
 // It also validates that the required fields Cluster and Namespace are set.
 func (c *Config) Active() (*Environment, error) {
 	if c.Current == "" {
-		return nil, errors.New("no active environment — run `ehz config use <env>` to set one up")
+		return nil, errors.New("no active environment — run `ehz use env <name> --cluster <url> --namespace <ns>`")
 	}
 
 	env, ok := c.Environments[c.Current]
 	if !ok {
-		return nil, fmt.Errorf("environment %q not found in config — run `ehz config view`", c.Current)
+		return nil, fmt.Errorf("environment %q not found in config — run `ehz get envs`", c.Current)
 	}
 
 	if env.Cluster == "" {
-		return nil, fmt.Errorf("environment %q has no cluster URL — edit ~/.ehz/config.yaml", c.Current)
+		return nil, fmt.Errorf("environment %q has no cluster URL — run `ehz use env %s --cluster <url>`", c.Current, c.Current)
 	}
 
 	if env.Namespace == "" {
-		return nil, fmt.Errorf("environment %q has no namespace — edit ~/.ehz/config.yaml", c.Current)
+		return nil, fmt.Errorf("environment %q has no namespace — run `ehz use env %s --namespace <ns>`", c.Current, c.Current)
 	}
 
 	return &env, nil
@@ -145,7 +145,7 @@ func (c *Config) Upsert(name string, env Environment) error {
 // Use switches the active environment to name and saves the config file.
 func (c *Config) Use(name string) error {
 	if _, ok := c.Environments[name]; !ok {
-		return fmt.Errorf("environment %q does not exist — run `ehz config view` to see available environments", name)
+		return fmt.Errorf("environment %q does not exist — run `ehz get envs`", name)
 	}
 
 	c.Current = name
