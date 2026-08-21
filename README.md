@@ -16,12 +16,9 @@
 ### Homebrew
 
 ```sh
-brew tap chay-24/tap
+brew tap chay-24/tap && `brew trust --tap chay-24/tap`
 brew install chay-24/tap/ehz
 ```
-
-Homebrew 6.0+ asks you to trust the tap the first time.
-run `brew trust --tap chay-24/tap` beforehand.
 
 Upgrade later with `brew upgrade ehz`.
 
@@ -48,7 +45,18 @@ go build -o ehz .
 
 ## Configure
 
-`ehz` reads `~/.ehz/config.yaml`:
+Add an environment and make it active:
+
+```sh
+ehz use env dev \
+  --cluster https://api.dev.openshift.example.com:6443 \
+  --namespace kafka-develop
+```
+
+Switch between existing environments with `ehz use env <name>`, and list them
+with `ehz get envs`.
+
+Settings are stored in `~/.ehz/config.yaml`, which you can also edit by hand:
 
 ```yaml
 current: dev
@@ -72,10 +80,10 @@ You must already be logged in via `oc login` to each cluster URL.
 | `ehz get envs` | Show configured environments |
 | `ehz describe topic <name>` | Per-partition offsets, replicas, ISR, config |
 | `ehz describe group <name>` | Per-partition committed offsets and lag |
-| `ehz tree [cluster]` | Strimzi resource dependency tree
+| `ehz tree [cluster]` | Strimzi resource dependency tree |
 | `ehz consume topic <name>` | Stream messages from a topic |
 | `ehz find topic <name> -w <expr>` | Scan from beginning for the first matching message |
-| `ehz use env <name>` | Switch the active environment |
+| `ehz use env <name>` | Switch the active environment (add `--cluster`/`--namespace` to create or update it) |
 
 All listing/describing commands accept `-o json` for machine output.
 
