@@ -20,7 +20,6 @@ func Root() *cli.Command {
 	return &cli.Command{
 		Name:    "ehz",
 		Short:   "Explore and inspect your Strimzi Kafka cluster on OpenShift.",
-		Long:    "Explore and inspect your StrimziKafka cluster on OpenShift.",
 		Version: version,
 		Commands: []cli.Command{
 			*get.Get(),

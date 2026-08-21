@@ -314,7 +314,7 @@ func podLabel(p item) string {
 	ready, total := 0, len(p.Status.ContainerStatuses)
 	restarts := 0
 	var reasons []string
-	seem := map[string]bool{}
+	seen := map[string]bool{}
 
 	for _, c := range p.Status.ContainerStatuses {
 		if c.Ready {
@@ -332,9 +332,9 @@ func podLabel(p item) string {
 			reason = c.State.Terminated.Reason
 		}
 
-		if reason != "" && reason != "Completed" && !seem[reason] {
+		if reason != "" && reason != "Completed" && !seen[reason] {
 			reasons = append(reasons, reason)
-			seem[reason] = true
+			seen[reason] = true
 		}
 	}
 
